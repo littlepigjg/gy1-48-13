@@ -203,6 +203,10 @@ export class EnemyManager {
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const e = this.enemies[i];
 
+      if (e.health <= 0 && !(e.demon && e.demon.isExploding)) {
+        continue;
+      }
+
       e.tileX = Math.floor(e.x / TILE_SIZE);
       e.tileY = Math.floor(e.y / TILE_SIZE);
       e.animTimer += dt;
@@ -395,7 +399,9 @@ export class EnemyManager {
         e.damageFlash = 0.2;
 
         if (e.health <= 0) {
-          tryEnterDemonExplosion(e);
+          if (!tryEnterDemonExplosion(e)) {
+            this.cleanupEnemy(e);
+          }
         }
       }
     }
@@ -410,6 +416,10 @@ export class EnemyManager {
           minion.isMinion = false;
         }
       }
+      if (e.demon) {
+        e.demon.minionCount = 0;
+      }
+      e.minions = [];
     }
 
     if (e.masterId) {

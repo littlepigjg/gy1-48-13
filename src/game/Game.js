@@ -484,16 +484,22 @@ export class Game {
   }
 
   checkEnemyKills() {
+    const toRemove = [];
+
     for (const e of this.enemies.enemies) {
       if (e.health <= 0 && !e.demon?.isExploding) {
         this.particles.spawnCircle(e.x, e.y, e.color, 12, 4);
         this.particles.spawn(e.x, e.y, '#FFD700', 6, 3, { gravity: -0.05 });
         this.player.gold += e.gold;
         this.stats.enemiesKilled++;
+        this.enemies.cleanupEnemy(e);
+        toRemove.push(e.id);
       }
     }
 
-    this.enemies.enemies = this.enemies.enemies.filter(e => e.health > 0 || (e.demon && e.demon.isExploding));
+    this.enemies.enemies = this.enemies.enemies.filter(e => 
+      e.health > 0 || (e.demon && e.demon.isExploding)
+    );
   }
 
   checkLowResources() {
