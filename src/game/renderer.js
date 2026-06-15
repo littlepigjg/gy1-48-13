@@ -426,8 +426,79 @@ export class Renderer {
       const size = e.width;
       const half = size / 2;
 
+      if (e.type === 'worm' && e.state === 'digging') {
+        const alpha = 0.3 + Math.sin(Date.now() * 0.01) * 0.2;
+        this.ctx.fillStyle = `rgba(139, 69, 19, ${alpha})`;
+        this.ctx.beginPath();
+        this.ctx.arc(screen.x, screen.y, size * 0.6, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        for (let i = 0; i < 3; i++) {
+          const angle = (Date.now() * 0.003 + i * Math.PI * 2 / 3) % (Math.PI * 2);
+          const dist = size * (0.3 + Math.sin(Date.now() * 0.005 + i) * 0.2);
+          const px = screen.x + Math.cos(angle) * dist;
+          const py = screen.y + Math.sin(angle) * dist;
+          this.ctx.fillStyle = `rgba(139, 69, 19, ${alpha * 0.5})`;
+          this.ctx.beginPath();
+          this.ctx.arc(px, py, 3 + Math.random() * 2, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+        continue;
+      }
+
+      if (e.type === 'worm' && e.state === 'emerging') {
+        const progress = 1 - e.worm.emergeTimer / 60;
+        const warningAlpha = 0.5 + Math.sin(Date.now() * 0.02) * 0.3;
+        this.ctx.strokeStyle = `rgba(255, 100, 0, ${warningAlpha})`;
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        this.ctx.arc(screen.x, screen.y, size * (0.8 + progress * 0.4), 0, Math.PI * 2);
+        this.ctx.stroke();
+
+        this.ctx.fillStyle = `rgba(255, 100, 0, ${warningAlpha * 0.3})`;
+        this.ctx.beginPath();
+        this.ctx.arc(screen.x, screen.y, size * (0.6 + progress * 0.3), 0, Math.PI * 2);
+        this.ctx.fill();
+      }
+
+      if (e.demon && e.demon.isExploding) {
+        const progress = 1 - e.demon.deathExplosionTimer / 60;
+        const pulseAlpha = 0.5 + Math.sin(Date.now() * 0.03) * 0.4;
+
+        this.ctx.fillStyle = `rgba(255, 69, 0, ${pulseAlpha})`;
+        this.ctx.beginPath();
+        this.ctx.arc(screen.x, screen.y, size * (1 + progress * 2), 0, Math.PI * 2);
+        this.ctx.fill();
+
+        this.ctx.fillStyle = `rgba(255, 255, 0, ${pulseAlpha * 0.8})`;
+        this.ctx.beginPath();
+        this.ctx.arc(screen.x, screen.y, size * (0.8 + progress * 1.5), 0, Math.PI * 2);
+        this.ctx.fill();
+
+        this.ctx.fillStyle = `rgba(255, 255, 255, ${pulseAlpha})`;
+        this.ctx.beginPath();
+        this.ctx.arc(screen.x, screen.y, size * (0.5 + progress), 0, Math.PI * 2);
+        this.ctx.fill();
+      }
+
       this.ctx.save();
       this.ctx.translate(screen.x, screen.y);
+
+      if (e.buffedBy && e.buffedBy.size > 0) {
+        const buffPulse = 0.5 + Math.sin(Date.now() * 0.005) * 0.3;
+        this.ctx.shadowColor = '#FF4500';
+        this.ctx.shadowBlur = 15 + buffPulse * 10;
+      }
+
+      if (e.flanking) {
+        this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([5, 3]);
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, size * 0.9, 0, Math.PI * 2);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+      }
 
       if (e.damageFlash > 0) {
         this.ctx.globalAlpha = 0.5;
@@ -551,6 +622,59 @@ export class Renderer {
       this.ctx.fillRect(barX, barY, barWidth, barHeight);
       this.ctx.fillStyle = '#E74C3C';
       this.ctx.fillRect(barX, barY, barWidth * (e.health / e.maxHealth), barHeight);
+
+      let statusIconX = screen.x - 20;
+      const statusIconY = screen.y - half - 20;
+
+      if (e.role === 'tank') {
+        this.ctx.fillStyle = '#FF6B6B';
+        this.ctx.font = '12px sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('🛡️', statusIconX, statusIconY);
+        statusIconX += 14;
+      }
+      if (e.role === 'flanker') {
+        this.ctx.fillStyle = '#4ECDC4';
+        this.ctx.font = '12px sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('⚔️', statusIconX, statusIconY);
+        statusIconX += 14;
+      }
+      if (e.role === 'ambusher') {
+        this.ctx.fillStyle = '#95E1D3';
+        this.ctx.font = '12px sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('🕳️', statusIconX, statusIconY);
+        statusIconX += 14;
+      }
+      if (e.isMinion) {
+        this.ctx.fillStyle = '#DDA0DD';
+        this.ctx.font = '12px sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('👶', statusIconX, statusIconY);
+        statusIconX += 14;
+      }
+      if (e.buffedBy && e.buffedBy.size > 0) {
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.font = '12px sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('✨', statusIconX, statusIconY);
+        statusIconX += 14;
+      }
+      if (e.state === 'web_placement') {
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.font = '12px sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('🕸️', statusIconX, statusIconY);
+        statusIconX += 14;
+      }
+      if (e.state === 'summoning') {
+        this.ctx.fillStyle = '#FF00FF';
+        this.ctx.font = '12px sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('🌀', statusIconX, statusIconY);
+        statusIconX += 14;
+      }
     }
   }
 

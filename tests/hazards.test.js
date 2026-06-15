@@ -180,7 +180,7 @@ describe('HazardManager', () => {
 
     const startPositions = hm.poisonClouds.map(c => ({ x: c.x, y: c.y }));
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 40; i++) {
       hm.update(0.1, mockWorld, mockPlayer, () => {});
     }
 

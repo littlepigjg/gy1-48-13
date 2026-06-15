@@ -228,7 +228,8 @@ export class Game {
 
   update(dt) {
     if (!this.teleport.isTeleporting()) {
-      this.player.update(dt, this.world, this.input);
+      const webSlowFactor = this.hazards.getWebSlowFactor(this.player);
+      this.player.update(dt, this.world, this.input, webSlowFactor);
     }
 
     this.teleport.update(dt, this.player, this.world, this.particles, (cost) => {
@@ -237,7 +238,7 @@ export class Game {
       this.renderer.shake(2, 0.3);
     });
 
-    this.enemies.update(dt, this.player, this.world);
+    this.enemies.update(dt, this.player, this.world, this.hazards, this.particles, this);
     this.handleDigging(dt);
     this.handleShooting(dt);
     this.updateBullets(dt);
@@ -247,6 +248,11 @@ export class Game {
         this.player.takeDamage(damage);
         if (Math.random() < 0.2) {
           this.particles.spawnTrail(this.player.x, this.player.y, '#7CFC00');
+        }
+      } else if (type === 'web') {
+        this.player.takeDamage(damage);
+        if (Math.random() < 0.1) {
+          this.particles.spawnTrail(this.player.x, this.player.y, '#FFFFFF');
         }
       }
     });
@@ -478,8 +484,7 @@ export class Game {
   }
 
   checkEnemyKills() {
-    const before = this.enemies.enemies.length;
-    const killedEnemies = this.enemies.enemies.filter(e => e.health <= 0);
+    const killedEnemies = this.enemies.enemies.filter(e => e.health <= 0 && !e.demon?.isExploding);
     
     for (const e of killedEnemies) {
       this.particles.spawnCircle(e.x, e.y, e.color, 12, 4);
@@ -487,7 +492,7 @@ export class Game {
       this.stats.enemiesKilled++;
     }
 
-    this.enemies.enemies = this.enemies.enemies.filter(e => e.health > 0);
+    this.enemies.enemies = this.enemies.enemies.filter(e => e.health > 0 || (e.demon && e.demon.isExploding));
   }
 
   checkLowResources() {

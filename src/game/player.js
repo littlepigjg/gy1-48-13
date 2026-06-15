@@ -174,7 +174,7 @@ export class Player {
     };
   }
 
-  update(dt, world, input) {
+  update(dt, world, input, speedMultiplier = 1.0) {
     this.tileX = Math.floor(this.x / TILE_SIZE);
     this.tileY = Math.floor(this.y / TILE_SIZE);
     
@@ -201,7 +201,7 @@ export class Player {
       }
     }
 
-    const moveSpeed = this.speed * dt * 60;
+    const moveSpeed = this.speed * speedMultiplier * dt * 60;
     const newX = this.x + moveX * moveSpeed;
     const newY = this.y + moveY * moveSpeed;
 

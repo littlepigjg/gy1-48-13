@@ -149,3 +149,99 @@ export const TELEPORT_COST_BASE = 30;
 export const TELEPORT_COST_PER_100M = 20;
 export const TELEPORT_DURATION = 2.5;
 export const TELEPORT_COOLDOWN = 5;
+
+export const AI_CONFIG = {
+  group: {
+    communicationRange: 15,
+    supportRequestCooldown: 180,
+    flankAngleRange: { min: Math.PI * 0.3, max: Math.PI * 0.7 },
+    flankDistance: 3,
+    divisionOfLabor: {
+      tankers: ['demon'],
+      flankers: ['spider', 'bat'],
+      ambushers: ['worm']
+    }
+  },
+
+  terrain: {
+    spider: { preferredTiles: ['CAVE', 'EMPTY'], avoidTiles: ['LAVA'], narrowSpaceBonus: 1.5 },
+    bat: { preferredTiles: ['CAVE', 'EMPTY'], avoidTiles: [], openSpaceBonus: 1.3 },
+    demon: { preferredTiles: ['CAVE'], avoidTiles: [], anySpaceBonus: 1.0 },
+    worm: { preferredTiles: ['DIRT', 'STONE', 'HARD_STONE'], avoidTiles: ['LAVA', 'BEDROCK'], diggableBonus: 2.0 }
+  },
+
+  spider: {
+    webCooldown: 300,
+    webRange: 5,
+    webDuration: 600,
+    webSlowFactor: 0.4,
+    webDamagePerSecond: 2,
+    maxWebs: 3,
+    channelWidthThreshold: 4,
+    patrolRange: 8
+  },
+
+  bat: {
+    summonOnHit: true,
+    summonRange: 10,
+    summonChance: 0.6,
+    maxSummons: 3,
+    summonCooldown: 240,
+    swarmAttackRange: 2,
+    swarmDamageBonus: 1.5,
+    minSwarmSize: 3
+  },
+
+  demon: {
+    summonInterval: 480,
+    summonCount: 2,
+    maxMinions: 4,
+    explosionRadius: 4,
+    explosionDamage: 30,
+    explosionDelay: 60,
+    buffRange: 8,
+    buffDamageMultiplier: 1.3,
+    buffSpeedMultiplier: 1.2
+  },
+
+  worm: {
+    digTime: 180,
+    emergeWarningTime: 60,
+    ambushRange: 6,
+    emergeDamage: 15,
+    digDamageReduction: 0.8,
+    surfaceTime: 240,
+    preferredDepth: { min: 3, max: 15 },
+    chaseThroughWalls: true
+  },
+
+  global: {
+    aggroRange: 12,
+    deaggroRange: 20,
+    pathfindUpdateInterval: 30,
+    maxEnemies: 16
+  }
+};
+
+export const ENEMY_ROLES = {
+  TANK: 'tank',
+  FLANKER: 'flanker',
+  AMBUSHER: 'ambusher',
+  SUPPORT: 'support'
+};
+
+export const ENEMY_STATES = {
+  IDLE: 'idle',
+  PATROL: 'patrol',
+  CHASE: 'chase',
+  ATTACK: 'attack',
+  FLEE: 'flee',
+  SUPPORT: 'support',
+  FLANK: 'flank',
+  AMBUSH: 'ambush',
+  DIGGING: 'digging',
+  EMERGING: 'emerging',
+  SUMMONING: 'summoning',
+  WEB_PLACEMENT: 'web_placement',
+  DEAD: 'dead'
+};
